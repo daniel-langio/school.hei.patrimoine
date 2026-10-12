@@ -58,7 +58,9 @@ class PatrimoineCliTest {
     assertDoesNotThrow(
         () ->
             PatrimoineCli.main(
-                new String[] {"recouper", RESOURCE_FILE_PATH.toString(), "--cas", "LocationMaison"}));
+                new String[] {
+                  "recouper", RESOURCE_FILE_PATH.toString(), "--cas", "LocationMaison"
+                }));
   }
 
   @Test
