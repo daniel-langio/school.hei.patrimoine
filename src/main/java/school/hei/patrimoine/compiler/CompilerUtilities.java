@@ -6,14 +6,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import lombok.extern.slf4j.Slf4j;
+import school.hei.patrimoine.google.GoogleApiUtilities;
 
 @Slf4j
 public class CompilerUtilities {
   private CompilerUtilities() {}
 
-  public static final String USER_HOME = System.getProperty("user.home");
-  public static final String COMPILE_DIR_NAME = USER_HOME + "/.patrimoine/compile";
-  public static final String DOWNLOADS_DIRECTORY_PATH = USER_HOME + "/.patrimoine/drive";
+  public static final String APP_HOME = GoogleApiUtilities.getApplicationHomeDirectory();
+  public static final String COMPILE_DIR_NAME = APP_HOME + "/compile";
+  public static final String DOWNLOADS_DIRECTORY_PATH = APP_HOME + "/drive";
   private static final String PATRIMOINE_JAR_NAME = "patrimoine-1.0-SNAPSHOT.jar";
 
   public static final String PATRIMOINE_JAR_PATH =

@@ -46,7 +46,10 @@ public class GoogleApiUtilities {
   }
 
   public static String getApplicationHomeDirectory() {
-    return getUserHome() + "/." + getApplicationName();
+    var custom = System.getProperty("patrimoine.home", System.getenv("PATRIMOINE_HOME"));
+    return custom != null && !custom.isBlank()
+        ? custom
+        : getUserHome() + "/." + getApplicationName();
   }
 
   public static void setup() {
