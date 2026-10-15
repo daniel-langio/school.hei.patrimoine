@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static school.hei.patrimoine.patrilang.PatriLangTranspiler.transpileToutCas;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import school.hei.patrimoine.cas.Cas;
 import school.hei.patrimoine.cas.CasSet;
@@ -14,8 +15,8 @@ import school.hei.patrimoine.visualisation.xchart.GrapheConf;
 import school.hei.patrimoine.visualisation.xchart.GrapheurEvolutionPatrimoine;
 
 /**
- * Headless counterpart to the Swing/Vaadin UI: lints a PatriLang file (Spécifier) and runs the
- * same Projeter/Recouper/Alerter operations the UI exposes, for scripting and CI use.
+ * Headless counterpart to the Swing/Vaadin UI: lints a PatriLang file (Spécifier) and runs the same
+ * Projeter/Recouper/Alerter operations the UI exposes, for scripting and CI use.
  */
 public class PatrimoineCli {
 
@@ -86,8 +87,16 @@ public class PatrimoineCli {
   }
 
   private static Cas aggregate(CasSet casSet) {
-    var premier = casSet.set().stream().toList().getFirst();
-    return new ToutCas(premier.getAjd(), premier.getFinSimulation(), casSet);
+    // casSet.set() is unordered: pick the widest span across every Cas rather than an
+    // arbitrary one, whose own (ajd, finSimulation) may not even be ordered correctly
+    // for use as the aggregate's range.
+    var ajd = casSet.set().stream().map(Cas::getAjd).min(Comparator.naturalOrder()).orElseThrow();
+    var fin =
+        casSet.set().stream()
+            .map(Cas::getFinSimulation)
+            .max(Comparator.naturalOrder())
+            .orElseThrow();
+    return new ToutCas(ajd, fin, casSet);
   }
 
   private static Cas find(CasSet casSet, String nom) {

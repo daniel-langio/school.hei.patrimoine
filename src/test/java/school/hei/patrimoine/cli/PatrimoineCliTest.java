@@ -46,10 +46,22 @@ class PatrimoineCliTest {
     assertTrue(capturedOut.toString().startsWith("OK:"));
   }
 
+  // FamilleRakoto.patri.md's own two sub-cas each compute a finSimulation before their own
+  // ajd (LocationMaison deliberately models a "retard sur les actions" scenario, ZetyPersonnel
+  // likewise shifts its window the other way) - that's fine for lint/validate, but not a window
+  // EvolutionPatrimoine can iterate. Pass the file's own global Dates (ajd=2025-01-10,
+  // finSimulation=2025-04-10) explicitly, the way a UI user would pick a sensible range by hand.
+  private static final String DEBUT = "2025-01-10";
+  private static final String FIN = "2025-04-10";
+
   @Test
   void projeter_generates_a_chart_for_the_aggregate_patrimoine() {
     assertDoesNotThrow(
-        () -> PatrimoineCli.main(new String[] {"projeter", RESOURCE_FILE_PATH.toString()}));
+        () ->
+            PatrimoineCli.main(
+                new String[] {
+                  "projeter", RESOURCE_FILE_PATH.toString(), "--debut", DEBUT, "--fin", FIN
+                }));
     assertTrue(capturedOut.toString().contains("Image générée"));
   }
 
@@ -58,12 +70,25 @@ class PatrimoineCliTest {
     assertDoesNotThrow(
         () ->
             PatrimoineCli.main(
-                new String[] {"recouper", RESOURCE_FILE_PATH.toString(), "--cas", "LocationMaison"}));
+                new String[] {
+                  "recouper",
+                  RESOURCE_FILE_PATH.toString(),
+                  "--cas",
+                  "LocationMaison",
+                  "--debut",
+                  DEBUT,
+                  "--fin",
+                  FIN
+                }));
   }
 
   @Test
   void alerter_lists_flux_impossibles_without_failing() {
     assertDoesNotThrow(
-        () -> PatrimoineCli.main(new String[] {"alerter", RESOURCE_FILE_PATH.toString()}));
+        () ->
+            PatrimoineCli.main(
+                new String[] {
+                  "alerter", RESOURCE_FILE_PATH.toString(), "--debut", DEBUT, "--fin", FIN
+                }));
   }
 }
