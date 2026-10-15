@@ -26,6 +26,14 @@ jobs:
       - name: Test
         run: mvn clean verify
 
+      - name: Upload executable jar
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: patrimoine-exec-jar
+          path: target/patrimoine-1.0-SNAPSHOT-exec.jar
+          if-no-files-found: error
+
   format:
     runs-on: ubuntu-latest
     timeout-minutes: 20
