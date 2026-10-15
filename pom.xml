@@ -230,6 +230,17 @@
             <artifactId>
                 spring-boot-maven-plugin
             </artifactId>
+            <configuration>
+                <mainClass>school.hei.patrimoine.visualisation.swing.ihm.google.PatriLangViewer</mainClass>
+                <classifier>exec</classifier>
+            </configuration>
+            <executions>
+                <execution>
+                    <goals>
+                        <goal>repackage</goal>
+                    </goals>
+                </execution>
+            </executions>
         </plugin>
         <!--
         Takes care of synchronizing java

@@ -16,3 +16,5 @@ vite.generated.ts
 tsconfig.json
 types.d.ts
 index.html
+# wrapper jars (built by wrapper/build.sh)
+wrapper/versions/*.jar
