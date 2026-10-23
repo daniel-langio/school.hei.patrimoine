@@ -9,7 +9,9 @@ import java.util.List;
 import school.hei.patrimoine.cas.Cas;
 import school.hei.patrimoine.cas.CasSet;
 import school.hei.patrimoine.cas.ToutCas;
+import school.hei.patrimoine.modele.Argent;
 import school.hei.patrimoine.modele.evolution.EvolutionPatrimoine;
+import school.hei.patrimoine.modele.possession.TypeAgregat;
 import school.hei.patrimoine.patrilang.validator.PatriLangValidator;
 import school.hei.patrimoine.visualisation.xchart.GrapheConf;
 import school.hei.patrimoine.visualisation.xchart.GrapheurEvolutionPatrimoine;
@@ -35,9 +37,14 @@ public class PatrimoineCli {
         case "projeter" -> projeter(file, rest);
         case "recouper" -> recouper(file, rest);
         case "alerter" -> alerter(file, rest);
+        case "valeur" -> valeur(file, rest);
         default -> printUsageAndExit();
       }
     } catch (RuntimeException e) {
+      // ParseCancellationException (syntax errors) already carries "ligne X, colonne Y
+      // dans le fichier ..." from PatrilangErrorListener; other RuntimeExceptions carry
+      // whatever message the semantic validation raised (e.g. missing variable), with no
+      // line/column since that's not plumbed through the visitors.
       System.err.println(e.getMessage());
       System.exit(1);
     }
@@ -46,6 +53,46 @@ public class PatrimoineCli {
   private static void lint(String file) {
     new PatriLangValidator().accept(file);
     System.out.println("OK: " + file + " est valide.");
+  }
+
+  private static void valeur(String file, List<String> rest) {
+    var opts = Options.parse(rest);
+    var casSet = transpileToutCas(file);
+    var cas = opts.casNom == null ? aggregate(casSet) : find(casSet, opts.casNom);
+    var date = opts.debut != null ? opts.debut : LocalDate.now();
+    var patrimoine = cas.patrimoine().projectionFuture(date);
+    var symbole = patrimoine.getDevise().symbole();
+
+    if (opts.compte != null) {
+      var possession =
+          patrimoine.getPossessions().stream()
+              .filter(p -> p.nom().equals(opts.compte))
+              .findFirst()
+              .orElseThrow(
+                  () -> new IllegalArgumentException("Compte introuvable: " + opts.compte));
+      System.out.printf(
+          "%s au %s: %s%s%n", opts.compte, date, montant(possession.valeurComptable()), symbole);
+      return;
+    }
+
+    var total = montant(patrimoine.getValeurComptable());
+    System.out.printf("Patrimoine (%s) au %s: %s%s%n", patrimoine.nom(), date, total, symbole);
+    for (var type :
+        List.of(TypeAgregat.TRESORERIE, TypeAgregat.IMMOBILISATION, TypeAgregat.OBLIGATION)) {
+      var sousTotal =
+          patrimoine.getPossessions().stream()
+              .filter(p -> p.typeAgregat() == type)
+              .mapToDouble(p -> montant(p.valeurComptable()))
+              .sum();
+      var pct = total == 0 ? 0 : (sousTotal / total) * 100;
+      System.out.printf("  %-15s %12.0f%s (%.1f%%)%n", type, sousTotal, symbole, pct);
+    }
+  }
+
+  private static double montant(Argent a) {
+    // Argent exposes no numeric getter outside its package; ppMontant() is its own
+    // double-to-string formatting, parsed back rather than duplicating that logic.
+    return Double.parseDouble(a.ppMontant());
   }
 
   private static void projeter(String file, List<String> rest) {
@@ -108,9 +155,11 @@ public class PatrimoineCli {
 
   private static void printUsageAndExit() {
     System.err.println(
-        "Usage: PatrimoineCli <lint|projeter|recouper|alerter> <fichier.patri.md> "
-            + "[--cas NOM] [--debut yyyy-MM-dd] [--fin yyyy-MM-dd] "
-            + "[--tresorerie] [--immobilisations] [--obligations]");
+        "Usage: PatrimoineCli <lint|projeter|recouper|alerter|valeur> <fichier.patri.md> "
+            + "[--cas NOM] [--debut yyyy-MM-dd] [--fin yyyy-MM-dd] [--compte NOM] "
+            + "[--tresorerie] [--immobilisations] [--obligations]\n"
+            + "  valeur: --debut is the query date (default: today); with --compte, prints just"
+            + " that account's balance, else total + %% breakdown by type.");
     System.exit(2);
   }
 
@@ -118,6 +167,7 @@ public class PatrimoineCli {
       String casNom,
       LocalDate debut,
       LocalDate fin,
+      String compte,
       boolean tresorerie,
       boolean immobilisations,
       boolean obligations) {
@@ -126,21 +176,23 @@ public class PatrimoineCli {
       String casNom = null;
       LocalDate debut = null;
       LocalDate fin = null;
+      String compte = null;
       boolean tresorerie = false;
       boolean immobilisations = false;
       boolean obligations = false;
       for (int i = 0; i < args.size(); i++) {
         switch (args.get(i)) {
           case "--cas" -> casNom = args.get(++i);
-          case "--debut" -> debut = LocalDate.parse(args.get(++i));
+          case "--debut", "--date" -> debut = LocalDate.parse(args.get(++i));
           case "--fin" -> fin = LocalDate.parse(args.get(++i));
+          case "--compte" -> compte = args.get(++i);
           case "--tresorerie" -> tresorerie = true;
           case "--immobilisations" -> immobilisations = true;
           case "--obligations" -> obligations = true;
           default -> throw new IllegalArgumentException("Option inconnue: " + args.get(i));
         }
       }
-      return new Options(casNom, debut, fin, tresorerie, immobilisations, obligations);
+      return new Options(casNom, debut, fin, compte, tresorerie, immobilisations, obligations);
     }
   }
 }
