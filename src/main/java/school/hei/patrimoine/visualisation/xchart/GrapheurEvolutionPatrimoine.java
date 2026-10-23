@@ -198,6 +198,7 @@ public class GrapheurEvolutionPatrimoine
     styler.setChartBackgroundColor(WHITE);
     styler.setLegendPosition(OutsideE);
     styler.setyAxisTickLabelsFormattingFunction(this::yFormatter);
+    styler.setXAxisTickMarkSpacingHint(100);
     styler.setPlotMargin(0);
     styler.setTheme(new MatlabTheme());
 
