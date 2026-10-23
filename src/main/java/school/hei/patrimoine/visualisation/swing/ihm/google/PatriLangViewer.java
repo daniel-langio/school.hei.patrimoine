@@ -52,7 +52,9 @@ public class PatriLangViewer extends App {
 
   @Override
   protected String defaultPageName() {
-    return LoginPage.PAGE_NAME;
+    // -Doffline=true skips the Google sign-in flow and opens the local file browser
+    // directly; sync-only features (comments, Drive upload) are simply unavailable.
+    return Boolean.getBoolean("offline") ? PatriLangFilesPage.PAGE_NAME : LoginPage.PAGE_NAME;
   }
 
   @Override
@@ -69,7 +71,12 @@ public class PatriLangViewer extends App {
     App.setup();
     FlatLightLaf.setup();
     GoogleApiUtilities.setup();
-    GoogleLinkListDownloader.setup();
+    // GoogleLinkListDownloader.setup() wipes download/ and staged/ to make room for a
+    // fresh Drive re-sync - destructive and pointless with no sync to follow it, so skip
+    // it in offline mode (no local recovery otherwise: this is the only call site).
+    if (!Boolean.getBoolean("offline")) {
+      GoogleLinkListDownloader.setup();
+    }
     invokeLater(PatriLangViewer::new);
   }
 }
