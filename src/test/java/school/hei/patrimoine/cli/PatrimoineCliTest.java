@@ -91,4 +91,32 @@ class PatrimoineCliTest {
                   "alerter", RESOURCE_FILE_PATH.toString(), "--debut", DEBUT, "--fin", FIN
                 }));
   }
+
+  @Test
+  void valeur_prints_total_and_breakdown_by_type() {
+    assertDoesNotThrow(
+        () ->
+            PatrimoineCli.main(
+                new String[] {"valeur", RESOURCE_FILE_PATH.toString(), "--date", DEBUT}));
+    assertTrue(capturedOut.toString().contains("Patrimoine"));
+    assertTrue(capturedOut.toString().contains("TRESORERIE"));
+  }
+
+  @Test
+  void valeur_prints_a_single_account_balance_with_compte_option() {
+    assertDoesNotThrow(
+        () ->
+            PatrimoineCli.main(
+                new String[] {
+                  "valeur",
+                  RESOURCE_FILE_PATH.toString(),
+                  "--cas",
+                  "LocationMaison",
+                  "--date",
+                  DEBUT,
+                  "--compte",
+                  "loyerMaison"
+                }));
+    assertTrue(capturedOut.toString().contains("loyerMaison"));
+  }
 }
