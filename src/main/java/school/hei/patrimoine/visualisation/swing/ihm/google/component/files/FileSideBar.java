@@ -141,7 +141,9 @@ public class FileSideBar extends JPanel {
   private Optional<String> getSelectedFileDriveId(File currentFile, FileCategory category) {
     GoogleLinkList<NamedID> ids = AppContext.getDefault().getData("named-ids");
 
-    if (currentFile == null) {
+    // "named-ids" is only populated after a Drive sync (SubmitLinkPage); in -Doffline
+    // mode there is none, so a local-only file simply has no Drive id.
+    if (currentFile == null || ids == null) {
       return Optional.empty();
     }
 

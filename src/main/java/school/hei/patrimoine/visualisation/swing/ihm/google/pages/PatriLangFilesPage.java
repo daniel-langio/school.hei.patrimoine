@@ -196,7 +196,8 @@ public class PatriLangFilesPage extends LazyPage {
                     .getRecouped())
         .onSuccess(recoupedCasSet -> new CasSetAnalyzer(DISPOSE_ON_CLOSE).accept(recoupedCasSet))
         .onError(
-            error -> {
+            originalError -> {
+              var error = originalError;
               while (error != null) {
                 if (error instanceof ObjectifExeption exeption) {
                   var objectifs = exeption.getObjectifNonAtteints();
@@ -206,9 +207,13 @@ public class PatriLangFilesPage extends LazyPage {
                 error = (Exception) error.getCause();
               }
 
+              log.error("Échec de génération de l'évolution graphique", originalError);
               showError(
                   "Erreur",
-                  "Une erreur s'est produite lors de la génération de l'évolution graphique");
+                  "Une erreur s'est produite lors de la génération de l'évolution graphique : "
+                      + originalError.getClass().getSimpleName()
+                      + " - "
+                      + originalError.getMessage());
             })
         .build()
         .execute();

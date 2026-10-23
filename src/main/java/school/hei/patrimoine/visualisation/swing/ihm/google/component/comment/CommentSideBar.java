@@ -95,14 +95,16 @@ public class CommentSideBar extends JPanel {
 
   private void update() {
     String fileId = state.get("selectedFileId");
-    if (fileId == null) return;
+    // Offline mode (no Drive login): selectedFileId is "" (no Drive id), commentApi is
+    // null - comments are a sync-only feature, so there's nothing to load.
+    if (fileId == null || fileId.isEmpty() || commentApi == null) return;
 
     resetPaginationForCurrentFile(fileId);
     loadComments(fileId, datePicker.getInstant());
   }
 
   private void loadComments(String fileId, Instant startDate) {
-    if (fileId == null) return;
+    if (fileId == null || fileId.isEmpty() || commentApi == null) return;
 
     initFilePagination(fileId);
 

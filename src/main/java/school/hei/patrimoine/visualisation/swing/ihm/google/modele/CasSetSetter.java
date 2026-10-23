@@ -24,6 +24,10 @@ public class CasSetSetter {
   private CasSetSetter() {
     this.observers = new ArrayList<>();
     globalState().subscribe("isAnyFileModified", this::updatedCasSet);
+    // plannedCasSet/doneCasSet otherwise stay null until the user saves/syncs a file or
+    // adds an imprévu - any page reading them before that (e.g. "Évolution graphique")
+    // NPEs. isAnyFileModified() defaults true when unset, so this runs exactly once.
+    updatedCasSet();
   }
 
   public void updatedCasSet() {

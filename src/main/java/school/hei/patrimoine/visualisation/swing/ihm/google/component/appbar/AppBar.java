@@ -97,6 +97,14 @@ public class AppBar extends JPanel {
     panel.setOpaque(false);
     panel.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
 
+    if (user == null) {
+      // -Doffline mode: never went through LoginPage, so no connected Google user.
+      var offlineLabel = new JLabel("Hors ligne");
+      offlineLabel.setFont(offlineLabel.getFont().deriveFont(Font.BOLD, 14f));
+      panel.add(offlineLabel, BorderLayout.CENTER);
+      return panel;
+    }
+
     var avatarLabel = new ImageComponent(user.avatarUrl(), user.displayName(), 40, true);
     var avatarPanel = new JPanel(new BorderLayout());
     avatarPanel.setOpaque(false);
