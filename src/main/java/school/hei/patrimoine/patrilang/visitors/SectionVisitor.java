@@ -77,6 +77,15 @@ public class SectionVisitor {
             });
   }
 
+  public void visitSectionEtiquettes(SectionEtiquettesContext ctx) {
+    ctx.ligneNom()
+        .forEach(
+            ligne -> {
+              var nom = visitText(ligne.nom);
+              this.variableVisitor.addToScope(nom, ETIQUETTE, nom);
+            });
+  }
+
   public void visitOperationTemplateDeclarations(SectionOperationTemplateDeclarationContext ctx) {
     ctx.operationTemplate()
         .forEach(

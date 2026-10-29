@@ -25,6 +25,7 @@ public class TransferArgentVisitor
     LocalDate t = this.variableVisitor.asDate(ctx.dateValue);
     Compte débiteur = this.variableVisitor.asCompte(ctx.compteDebiteurNom);
     Compte créditeur = this.variableVisitor.asCompte(ctx.compteCrediteurNom);
+    var etiquettes = this.variableVisitor.asEtiquettes(ctx.etiquettes());
     var dateFinOpt =
         ofNullable(ctx.dateFin()).map(context -> visitDateFin(context, this.variableVisitor));
 
@@ -38,7 +39,11 @@ public class TransferArgentVisitor
                     t,
                     dateFin.value(),
                     dateFin.dateOperation(),
-                    valeurComptable))
-        .orElseGet(() -> new TransfertArgent(id, débiteur, créditeur, t, valeurComptable));
+                    valeurComptable,
+                    etiquettes))
+        .orElseGet(
+            () ->
+                new TransfertArgent(
+                    id, débiteur, créditeur, t, t, t.getDayOfMonth(), valeurComptable, etiquettes));
   }
 }

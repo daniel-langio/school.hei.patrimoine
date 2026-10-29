@@ -43,6 +43,10 @@ public class PatriLangToutCasVisitor implements Function<ToutCasContext, CasSet>
       this.sectionVisitor.visitSectionDettes(ctx.sectionDettes());
     }
 
+    if (nonNull(ctx.sectionEtiquettes())) {
+      this.sectionVisitor.visitSectionEtiquettes(ctx.sectionEtiquettes());
+    }
+
     var casSet = this.sectionVisitor.visitSectionCas(ctx.sectionCas());
     return new CasSet(casSet, objectifFinal);
   }

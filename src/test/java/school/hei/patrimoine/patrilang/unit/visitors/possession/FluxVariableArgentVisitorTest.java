@@ -1,15 +1,19 @@
 package school.hei.patrimoine.patrilang.unit.visitors.possession;
 
 import static java.time.Month.JUNE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static school.hei.patrimoine.modele.Argent.ariary;
 import static school.hei.patrimoine.patrilang.antlr.PatriLangParser.FluxArgentEntrerContext;
 import static school.hei.patrimoine.patrilang.antlr.PatriLangParser.FluxArgentSortirContext;
 import static school.hei.patrimoine.patrilang.modele.variable.VariableType.DATE;
+import static school.hei.patrimoine.patrilang.modele.variable.VariableType.ETIQUETTE;
 import static school.hei.patrimoine.patrilang.modele.variable.VariableType.TRESORERIES;
 import static school.hei.patrimoine.patrilang.utils.Comparator.assertFluxArgentEquals;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Set;
 import org.junit.jupiter.api.Test;
 import school.hei.patrimoine.modele.possession.Compte;
 import school.hei.patrimoine.modele.possession.FluxArgent;
@@ -28,6 +32,8 @@ class FluxVariableArgentVisitorTest {
   static {
     variableVisitor.addToScope("ajd", DATE, AJD);
     variableVisitor.addToScope("comptePersonnel", TRESORERIES, COMPTE_PERSONNEL);
+    variableVisitor.addToScope("Vêtements", ETIQUETTE, "Vêtements");
+    variableVisitor.addToScope("Frais", ETIQUETTE, "Frais");
   }
 
   FluxArgentVisitor subject =
@@ -136,5 +142,41 @@ class FluxVariableArgentVisitorTest {
     FluxArgent actual = visitor.visit(input, PatriLangParser::fluxArgentSortir);
 
     assertFluxArgentEquals(expected, actual);
+  }
+
+  @Test
+  void parse_sortir_flux_argent_with_etiquettes() {
+    var input =
+        """
+    * `achat` Dates:ajd, sortir 20000Ar depuis Trésoreries:comptePersonnel, étiquettes Vêtements Frais
+""";
+
+    FluxArgent actual = visitor.visit(input, PatriLangParser::fluxArgentSortir);
+
+    assertEquals(Set.of("Vêtements", "Frais"), actual.getEtiquettes());
+  }
+
+  @Test
+  void parse_flux_argent_without_etiquettes_has_none() {
+    var input =
+        """
+    * `achat` Dates:ajd, sortir 20000Ar depuis Trésoreries:comptePersonnel
+""";
+
+    FluxArgent actual = visitor.visit(input, PatriLangParser::fluxArgentSortir);
+
+    assertEquals(Set.of(), actual.getEtiquettes());
+  }
+
+  @Test
+  void parse_flux_argent_with_unknown_etiquette_throws() {
+    var input =
+        """
+    * `achat` Dates:ajd, sortir 20000Ar depuis Trésoreries:comptePersonnel, étiquettes Inconnue
+""";
+
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> visitor.<FluxArgent>visit(input, PatriLangParser::fluxArgentSortir));
   }
 }

@@ -22,6 +22,7 @@ public class FluxArgentVisitor {
     Argent valeurComptable = this.variableVisitor.asArgent(ctx.valeurComptable);
     LocalDate t = this.variableVisitor.asDate(ctx.dateValue);
     Compte compte = this.variableVisitor.asCompte(ctx.compteCrediteurNom);
+    var etiquettes = this.variableVisitor.asEtiquettes(ctx.etiquettes());
     var dateFinOpt =
         ofNullable(ctx.dateFin()).map(dateFin -> visitDateFin(dateFin, this.variableVisitor));
 
@@ -38,8 +39,14 @@ public class FluxArgentVisitor {
         .map(
             dateFin ->
                 new FluxArgent(
-                    id, compte, t, dateFin.value(), dateFin.dateOperation(), valeurComptable))
-        .orElseGet(() -> new FluxArgent(id, compte, t, valeurComptable));
+                    id,
+                    compte,
+                    t,
+                    dateFin.value(),
+                    dateFin.dateOperation(),
+                    valeurComptable,
+                    etiquettes))
+        .orElseGet(() -> new FluxArgent(id, compte, t, valeurComptable, etiquettes));
   }
 
   public FluxArgent apply(FluxArgentSortirContext ctx) {
@@ -47,6 +54,7 @@ public class FluxArgentVisitor {
     Argent valeurComptable = this.variableVisitor.asArgent(ctx.valeurComptable).mult(-1);
     LocalDate t = this.variableVisitor.asDate(ctx.dateValue);
     Compte compte = this.variableVisitor.asCompte(ctx.compteDebiteurNom);
+    var etiquettes = this.variableVisitor.asEtiquettes(ctx.etiquettes());
     var dateFinOpt =
         ofNullable(ctx.dateFin()).map(dateFin -> visitDateFin(dateFin, this.variableVisitor));
 
@@ -63,7 +71,13 @@ public class FluxArgentVisitor {
         .map(
             dateFin ->
                 new FluxArgent(
-                    id, compte, t, dateFin.value(), dateFin.dateOperation(), valeurComptable))
-        .orElseGet(() -> new FluxArgent(id, compte, t, valeurComptable));
+                    id,
+                    compte,
+                    t,
+                    dateFin.value(),
+                    dateFin.dateOperation(),
+                    valeurComptable,
+                    etiquettes))
+        .orElseGet(() -> new FluxArgent(id, compte, t, valeurComptable, etiquettes));
   }
 }

@@ -1,12 +1,18 @@
 package school.hei.patrimoine.patrilang.visitors.variable;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static java.util.stream.Collectors.toUnmodifiableSet;
+import static school.hei.patrimoine.patrilang.antlr.PatriLangParser.EtiquettesContext;
 import static school.hei.patrimoine.patrilang.antlr.PatriLangParser.VariableContext;
 import static school.hei.patrimoine.patrilang.modele.variable.VariableType.DATE;
+import static school.hei.patrimoine.patrilang.modele.variable.VariableType.ETIQUETTE;
+import static school.hei.patrimoine.patrilang.visitors.BaseVisitor.visitText;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import lombok.Getter;
 import school.hei.patrimoine.cas.Cas;
 import school.hei.patrimoine.modele.Argent;
@@ -85,6 +91,17 @@ public class VariableVisitor implements SimpleVisitor<VariableContext, Variable<
 
   public LocalDate asDate(VariableContext ctx) {
     return visitVariableAsExpectedType(LocalDate.class, ctx);
+  }
+
+  public Set<String> asEtiquettes(EtiquettesContext ctx) {
+    if (isNull(ctx)) {
+      return Set.of();
+    }
+
+    return ctx.noms.stream()
+        .map(nom -> visitText(nom))
+        .peek(nom -> this.variableScope.get(nom, ETIQUETTE))
+        .collect(toUnmodifiableSet());
   }
 
   public <T> void addToScope(String name, VariableType type, T value) {

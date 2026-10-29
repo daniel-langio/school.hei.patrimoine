@@ -3,6 +3,7 @@ package school.hei.patrimoine.modele.possession;
 import static school.hei.patrimoine.modele.possession.TypeAgregat.FLUX;
 
 import java.time.LocalDate;
+import java.util.Set;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ public final class FluxArgent extends Possession {
   private final LocalDate fin;
   private final Argent fluxMensuel;
   private final int dateOperation;
+  private final Set<String> etiquettes;
 
   public FluxArgent(
       String nom,
@@ -26,6 +28,17 @@ public final class FluxArgent extends Possession {
       LocalDate fin,
       int dateOperation,
       Argent fluxMensuel) {
+    this(nom, compte, debut, fin, dateOperation, fluxMensuel, Set.of());
+  }
+
+  public FluxArgent(
+      String nom,
+      Compte compte,
+      LocalDate debut,
+      LocalDate fin,
+      int dateOperation,
+      Argent fluxMensuel,
+      Set<String> etiquettes) {
     super(nom, debut, new Argent(0, fluxMensuel.devise()));
     this.compte = compte;
     this.compte.addFinancés(this);
@@ -34,10 +47,16 @@ public final class FluxArgent extends Possession {
     this.fin = fin;
     this.fluxMensuel = fluxMensuel;
     this.dateOperation = dateOperation;
+    this.etiquettes = Set.copyOf(etiquettes);
   }
 
   public FluxArgent(String nom, Compte compte, LocalDate date, Argent montant) {
     this(nom, compte, date, date, date.getDayOfMonth(), montant);
+  }
+
+  public FluxArgent(
+      String nom, Compte compte, LocalDate date, Argent montant, Set<String> etiquettes) {
+    this(nom, compte, date, date, date.getDayOfMonth(), montant, etiquettes);
   }
 
   @Override
@@ -60,7 +79,8 @@ public final class FluxArgent extends Possession {
             .first();
     var argentFutur =
         new Compte(compte.nom + " réduit au financement de " + this, tFutur, valeurFutur);
-    return new FluxArgent(nom, argentFutur, debut, tFuturMajoréParFin, dateOperation, fluxMensuel);
+    return new FluxArgent(
+        nom, argentFutur, debut, tFuturMajoréParFin, dateOperation, fluxMensuel, etiquettes);
   }
 
   private static Pair<Argent, LocalDate> add(

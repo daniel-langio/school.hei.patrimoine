@@ -15,7 +15,7 @@ document
 
 /* ToutCas */
 toutCas
-    :   sectionToutCasGeneral sectionCas? sectionDatesDeclarations? sectionPersonnesMoralesDeclarations? sectionPersonnesDeclarations? sectionTresoreries? sectionCreances? sectionDettes? EOF
+    :   sectionToutCasGeneral sectionCas? sectionDatesDeclarations? sectionPersonnesMoralesDeclarations? sectionPersonnesDeclarations? sectionTresoreries? sectionCreances? sectionDettes? sectionEtiquettes? EOF
     ;
 
 ligneObjectifFinal
@@ -118,6 +118,15 @@ sectionDettes
     :   HASHES ENTETE_DETTES compteElement*
     ;
 
+/* Étiquettes */
+sectionEtiquettes
+    :   HASHES ETIQUETTES ligneNom*
+    ;
+
+etiquettes
+    :   COMMA? ETIQUETTES noms+=text+
+    ;
+
 /* Pieces justificatives */
 sectionPiecesJustificatives
     :  HASHES LIEN_PIECE_JUSTIFICATIVE piecesJustificativesItem*
@@ -196,15 +205,15 @@ compte
     ;
 
 fluxArgentTransferer
-    :   MUL id COMMA? dateValue=variable COMMA? MOT_TRANSFERER valeurComptable=variable MOT_DEPUIS compteDebiteurNom=variable MOT_VERS compteCrediteurNom=variable dateFin?
+    :   MUL id COMMA? dateValue=variable COMMA? MOT_TRANSFERER valeurComptable=variable MOT_DEPUIS compteDebiteurNom=variable MOT_VERS compteCrediteurNom=variable dateFin? etiquettes?
     ;
 
 fluxArgentEntrer
-    :   MUL id COMMA? dateValue=variable COMMA? MOT_ENTRER valeurComptable=variable MOT_VERS compteCrediteurNom=variable dateFin?
+    :   MUL id COMMA? dateValue=variable COMMA? MOT_ENTRER valeurComptable=variable MOT_VERS compteCrediteurNom=variable dateFin? etiquettes?
     ;
 
 fluxArgentSortir
-    :   MUL id COMMA? dateValue=variable COMMA? MOT_SORTIR valeurComptable=variable MOT_DEPUIS compteDebiteurNom=variable dateFin?
+    :   MUL id COMMA? dateValue=variable COMMA? MOT_SORTIR valeurComptable=variable MOT_DEPUIS compteDebiteurNom=variable dateFin? etiquettes?
     ;
 
 acheterMateriel

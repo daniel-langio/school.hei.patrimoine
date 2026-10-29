@@ -17,6 +17,18 @@ public final class TransfertArgent extends Possession {
       LocalDate fin,
       int dateOperation,
       Argent fluxMensuel) {
+    this(nom, depuisCompte, versCompte, debut, fin, dateOperation, fluxMensuel, Set.of());
+  }
+
+  public TransfertArgent(
+      String nom,
+      Compte depuisCompte,
+      Compte versCompte,
+      LocalDate debut,
+      LocalDate fin,
+      int dateOperation,
+      Argent fluxMensuel,
+      Set<String> etiquettes) {
     super(nom, debut, new Argent(0, fluxMensuel.devise()));
     this.transfertCommeGroupe =
         new GroupePossession(
@@ -30,14 +42,16 @@ public final class TransfertArgent extends Possession {
                     debut,
                     fin,
                     dateOperation,
-                    fluxMensuel.mult(-1)),
+                    fluxMensuel.mult(-1),
+                    etiquettes),
                 new FluxArgent(
                     "Flux TransfertArgent entrant: " + nom,
                     versCompte,
                     debut,
                     fin,
                     dateOperation,
-                    fluxMensuel)));
+                    fluxMensuel,
+                    etiquettes)));
   }
 
   public TransfertArgent(

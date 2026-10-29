@@ -105,6 +105,11 @@ ENTETE_DETTES
     :   'Dettes'
     ;
 
+/* Étiquettes */
+ETIQUETTES
+    :   ('é'|'É')'tiquettes'
+    ;
+
 /* Pièces justificative  */
 LIEN_PIECE_JUSTIFICATIVE
     :   'Pièces Justificatives'
